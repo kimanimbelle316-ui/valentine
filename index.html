@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine Surprise</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+        height: 100vh;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.8s ease;
+    }
+
+    .screen {
+        text-align: center;
+        padding: 20px;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
+
+    button {
+        padding: 12px 30px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        margin: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .refresh {
+        background: #333;
+        color: white;
+    }
+
+    .yes {
+        background: #ff4d6d;
+        color: white;
+    }
+
+    .no {
+        background: #555;
+        color: white;
+        position: relative;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .fade-out {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    .message {
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="screen" id="screen404">
+    <h1>404</h1>
+    <p>Oops! Page Not Found</p>
+    <button class="refresh" onclick="showValentine()">Refresh</button>
+</div>
+
+<div class="screen hidden" id="valentine">
+    <h1>Will you be my Valentine? <span id="emoji">💔</span></h1>
+    <div id="buttons">
+        <button class="yes" onclick="yesClicked()">YES</button>
+        <button class="no" id="noBtn" onclick="noClicked()">NO</button>
+    </div>
+    <div class="message hidden" id="yesMessage">
+        By clicking YES you agree to:<br>
+        You didn't have any other option you fool 😂!
+    </div>
+</div>
+
+<script>
+    const screen404 = document.getElementById('screen404');
+    const valentine = document.getElementById('valentine');
+    const noBtn = document.getElementById('noBtn');
+    const emoji = document.getElementById('emoji');
+    const yesMessage = document.getElementById('yesMessage');
+    const buttons = document.getElementById('buttons');
+
+    let noClicks = 0;
+
+    function showValentine() {
+        screen404.classList.add('hidden');
+        valentine.classList.remove('hidden');
+    }
+
+    function yesClicked() {
+        yesMessage.classList.remove('hidden');
+
+        setTimeout(() => {
+            buttons.classList.add('fade-out');
+        }, 1000);
+
+        startConfetti();
+        setTimeout(stopConfetti, 5000);
+    }
+
+    function noClicked() {
+        noClicks++;
+
+        const x = Math.random() * (window.innerWidth - 100);
+        const y = Math.random() * (window.innerHeight - 50);
+
+        noBtn.style.position = 'absolute';
+        noBtn.style.left = x + 'px';
+        noBtn.style.top = y + 'px';
+
+        document.body.style.background = `linear-gradient(135deg,
+            hsl(${Math.random() * 360}, 80%, 75%),
+            hsl(${Math.random() * 360}, 80%, 85%))`;
+
+        if (noClicks >= 2) {
+            emoji.textContent = '😂';
+        }
+    }
+
+    // Confetti
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let confettiParticles = [];
+    let confettiActive = false;
+
+    function startConfetti() {
+        confettiActive = true;
+        confettiParticles = Array.from({ length: 150 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 6 + 4,
+            d: Math.random() * 150,
+            color: `hsl(${Math.random() * 360},100%,50%)`,
+            tilt: Math.random() * 10
+        }));
+        requestAnimationFrame(drawConfetti);
+    }
+
+    function stopConfetti() {
+        confettiActive = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawConfetti() {
+        if (!confettiActive) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettiParticles.forEach(p => {
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            p.y += Math.cos(p.d) + 3;
+            p.x += Math.sin(p.d);
+            if (p.y > canvas.height) {
+                p.y = -10;
+                p.x = Math.random() * canvas.width;
+            }
+        });
+        requestAnimationFrame(drawConfetti);
+    }
+
+    window.onresize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+</script>
+
+</body>
+</html>
